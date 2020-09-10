@@ -126,3 +126,30 @@ func TodoUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func TodoDelete(w http.ResponseWriter, r *http.Request) {
+	todoId := mux.Vars(r)["todoId"]
+
+	for i, todo := range todos {
+		if todo.Id.String() == todoId {
+			todos = append(todos[:i], todos[i+1:]...)
+
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(todo); err != nil {
+				panic(err)
+			}
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusNotFound)
+
+	errorMessage := jsonErr{"Cannot find todo with id " + todoId}
+	if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
+		panic(err)
+	}
+
+}

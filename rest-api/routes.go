@@ -70,4 +70,10 @@ var routes = []Route{
 		"PUT",
 		TodoUpdate,
 	},
+	{
+		"TodoDelete",
+		"/todos/{todoId}",
+		"DELETE",
+		TodoDelete,
+	},
 }
