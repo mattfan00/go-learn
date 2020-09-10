@@ -9,56 +9,24 @@ import (
 	"net/http"
 )
 
-var todos = Todos{
-	{
-		Id:   uuid.New(),
-		Name: "finish homework",
-	},
-	{
-		Id:   uuid.New(),
-		Name: "do laundry",
-	},
-}
-
-type jsonErr struct {
-	ErrorMessage string `json:"errorMessage"`
-}
-
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "hellow owrld")
 }
 
 func TodoIndex(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(todos); err != nil {
-		panic(err)
-	}
+	SendTodos(w, &todos)
 }
 
 func TodoShow(w http.ResponseWriter, r *http.Request) {
 	todoId := mux.Vars(r)["todoId"]
 	for _, todo := range todos {
 		if todo.Id.String() == todoId {
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(http.StatusOK)
-
-			if err := json.NewEncoder(w).Encode(todo); err != nil {
-				panic(err)
-			}
+			SendTodo(w, &todo)
 			return
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-
-	errorMessage := jsonErr{"Cannot find todo with id " + todoId}
-
-	if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
-		panic(err)
-	}
+	SendError(w, "Cannot find todo with id "+todoId, http.StatusNotFound)
 }
 
 func TodoCreate(w http.ResponseWriter, r *http.Request) {
@@ -70,25 +38,13 @@ func TodoCreate(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err := json.Unmarshal(body, &newTodo); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusBadRequest)
-
-		errorMessage := jsonErr{"Invalid json syntax"}
-		if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
-			panic(err)
-		}
+		SendError(w, "Invalid json syntax", http.StatusBadRequest)
 		return
 	}
+
 	newTodo.Id = uuid.New()
-
 	todos = append(todos, newTodo)
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(newTodo); err != nil {
-		panic(err)
-	}
+	SendTodo(w, &newTodo)
 }
 
 func TodoUpdate(w http.ResponseWriter, r *http.Request) {
@@ -102,29 +58,17 @@ func TodoUpdate(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err := json.Unmarshal(body, &updatedTodo); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusBadRequest)
-
-		errorMessage := jsonErr{"Invalid json syntax"}
-		if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
-			panic(err)
-		}
+		SendError(w, "Invalid json syntax", http.StatusBadRequest)
 		return
 	}
 
 	for i, todo := range todos {
 		if todo.Id.String() == todoId {
 			todos[i] = updatedTodo
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(http.StatusOK)
-
-			if err := json.NewEncoder(w).Encode(updatedTodo); err != nil {
-				panic(err)
-			}
+			SendTodo(w, &updatedTodo)
 			return
 		}
 	}
-
 }
 
 func TodoDelete(w http.ResponseWriter, r *http.Request) {
@@ -133,23 +77,10 @@ func TodoDelete(w http.ResponseWriter, r *http.Request) {
 	for i, todo := range todos {
 		if todo.Id.String() == todoId {
 			todos = append(todos[:i], todos[i+1:]...)
-
-			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-			w.WriteHeader(http.StatusOK)
-
-			if err := json.NewEncoder(w).Encode(todo); err != nil {
-				panic(err)
-			}
+			SendTodo(w, &todo)
 			return
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-
-	errorMessage := jsonErr{"Cannot find todo with id " + todoId}
-	if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
-		panic(err)
-	}
-
+	SendError(w, "Cannot find todo with id "+todoId, http.StatusNotFound)
 }

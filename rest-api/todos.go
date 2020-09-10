@@ -13,3 +13,14 @@ type Todo struct {
 }
 
 type Todos []Todo
+
+var todos = Todos{
+	{
+		Id:   uuid.New(),
+		Name: "finish homework",
+	},
+	{
+		Id:   uuid.New(),
+		Name: "do laundry",
+	},
+}
