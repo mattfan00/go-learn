@@ -58,4 +58,10 @@ var routes = []Route{
 		"GET",
 		TodoShow,
 	},
+	{
+		"TodoCreate",
+		"/todos",
+		"POST",
+		TodoCreate,
+	},
 }
