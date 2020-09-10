@@ -90,3 +90,39 @@ func TodoCreate(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 }
+
+func TodoUpdate(w http.ResponseWriter, r *http.Request) {
+	var updatedTodo Todo
+
+	todoId := mux.Vars(r)["todoId"]
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	if err := json.Unmarshal(body, &updatedTodo); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest)
+
+		errorMessage := jsonErr{"Invalid json syntax"}
+		if err := json.NewEncoder(w).Encode(errorMessage); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	for i, todo := range todos {
+		if todo.Id.String() == todoId {
+			todos[i] = updatedTodo
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(updatedTodo); err != nil {
+				panic(err)
+			}
+			return
+		}
+	}
+
+}

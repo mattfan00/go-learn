@@ -64,4 +64,10 @@ var routes = []Route{
 		"POST",
 		TodoCreate,
 	},
+	{
+		"TodoUpdate",
+		"/todos/{todoId}",
+		"PUT",
+		TodoUpdate,
+	},
 }
