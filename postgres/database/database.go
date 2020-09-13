@@ -13,19 +13,23 @@ const (
 	dbname   = "test_demo"
 )
 
+var Db *sql.DB
+
 func Init() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
+	database, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
 
-	err = db.Ping()
+	err = database.Ping()
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("succesffuly connected")
 
-	return db
+	Db = database
+
+	return Db
 }
