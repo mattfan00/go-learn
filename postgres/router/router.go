@@ -27,5 +27,6 @@ func NewRouter() *mux.Router {
 
 var routes = []Route{
 	{"/", "GET", userIndex},
+	{"/{userId}", "GET", userShow},
 	{"/", "POST", userCreate},
 }
