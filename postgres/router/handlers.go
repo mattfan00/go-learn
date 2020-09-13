@@ -2,7 +2,6 @@ package router
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -53,8 +52,13 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	if err = json.Unmarshal(body, &user); err != nil {
-		panic(err)
+		SendError(w, "Invalid json format", http.StatusBadRequest)
+		return
+	}
 
+	if user.Email == "" {
+		SendError(w, "Must provide an email", http.StatusBadRequest)
+		return
 	}
 
 	query := `
@@ -67,7 +71,8 @@ func userCreate(w http.ResponseWriter, r *http.Request) {
 		Scan(&user.Id, &user.Age, &user.FirstName, &user.LastName, &user.Email)
 
 	if err != nil {
-		panic(err)
+		SendError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	SendResponse(w, user)
